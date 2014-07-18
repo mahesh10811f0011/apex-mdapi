@@ -10,7 +10,13 @@ page:
 Controller:
 -------------
 public class DynaFieldSavePageCls {
-// List<selectOption> options = new List<selectOption>();
+{get;set;}    //
+   
+    public sObject sObjectToBind {get;set;}
+    public List<String> listObjectFields {get;set;}
+     public  List<String> checkboxSelections 
+      public String strtemp;
+
 public String selcheckboxString;
   private Map<String, String> fieldValueLabels = new Map<String, String>();
  
@@ -34,20 +40,22 @@ list<SelectOption> options = new list<SelectOption>();
 
       Schema.DescribeFieldResult fieldResult = field.getDescribe();
      
-        if(fieldResult.getType() == Schema.DisplayType.MultiPickList) {
+        if(fieldResult.getType() == Schema.DisplayType.MultiPickList) 
+        {
        
-Schema.Picklistentry[] values = fieldResult.getPickListValues();
+             Schema.Picklistentry[] values = fieldResult.getPickListValues();
 
-Map<String, String> picklists = new Map<String, String>();
+             Map<String, String> picklists = new Map<String, String>();
 
-for(Schema.Picklistentry val: values){
-picklists.put(val.getLabel(), val.getValue());
+             for(Schema.Picklistentry val: values)
+             { 
+             picklists.put(val.getLabel(), val.getValue());
 
-fieldpicklists.put(fieldResult.getName(), picklists);
-  options.add(new SelectOption(val.getValue(), val.getLabel()));
- }
+             fieldpicklists.put(fieldResult.getName(), picklists);
+              options.add(new SelectOption(val.getValue(), val.getLabel()));
+              }
       
-   }
+       }
    
 }
 return options;
@@ -55,7 +63,7 @@ return options;
 }
 
 
-   public  List<String> checkboxSelections {get;set;}
+ 
   
   public void doSave()
 {
@@ -63,12 +71,7 @@ if( sObjectToBind != null )
   insert sObjectToBind;
 }
 
-   
-    public sObject sObjectToBind {get;set;}
-    public List<String> listObjectFields {get;set;}
-   
-      public String strtemp;
-   
+
        
    public DynaFieldSavePageCls()
 {
