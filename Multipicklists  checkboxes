@@ -1,0 +1,105 @@
+page:
+----------
+<apex:repeat value="{!listObjectFields}" var="fieldAPIName">
+             <apex:selectCheckboxes value="{!checkboxSelections}" layout="PageDirection">
+    <apex:selectOptions value="{!MyCheckboxes}"/>
+</apex:selectCheckboxes>
+               <apex:inputField value="{!sObjectToBind[fieldAPIName]}"/>
+           </apex:repeat>
+
+Controller:
+-------------
+public class DynaFieldSavePageCls {
+// List<selectOption> options = new List<selectOption>();
+public String selcheckboxString;
+  private Map<String, String> fieldValueLabels = new Map<String, String>();
+ 
+   private Map<String, Map<String,String>> fieldpicklists = new Map<String, Map<String,String>>();
+  public List<SelectOption> options{get;set;}
+     public list<selectOption> getMyCheckboxes(){
+
+      string objectname ='rajesh__MForm__c';
+
+list<SelectOption> options = new list<SelectOption>();
+
+    Schema.sObjectType objType = sObjectToBind.getSObjectType();
+   
+      Schema.DescribeSObjectResult objDescribe = objType.getDescribe(); 
+      
+    map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap();
+   
+ 
+    for(Schema.SObjectField field : fieldMap.values())
+    {
+
+      Schema.DescribeFieldResult fieldResult = field.getDescribe();
+     
+        if(fieldResult.getType() == Schema.DisplayType.MultiPickList) {
+       
+Schema.Picklistentry[] values = fieldResult.getPickListValues();
+
+Map<String, String> picklists = new Map<String, String>();
+
+for(Schema.Picklistentry val: values){
+picklists.put(val.getLabel(), val.getValue());
+
+fieldpicklists.put(fieldResult.getName(), picklists);
+  options.add(new SelectOption(val.getValue(), val.getLabel()));
+ }
+      
+   }
+   
+}
+return options;
+
+}
+
+
+   public  List<String> checkboxSelections {get;set;}
+  
+  public void doSave()
+{
+if( sObjectToBind != null )
+  insert sObjectToBind;
+}
+
+   
+    public sObject sObjectToBind {get;set;}
+    public List<String> listObjectFields {get;set;}
+   
+      public String strtemp;
+   
+       
+   public DynaFieldSavePageCls()
+{
+
+     string objectname ='rajesh__MForm__c';
+
+    listObjectFields =  new List<String>();
+    Map<String , Schema.SObjectType> globalDescription = Schema.getGlobalDescribe();
+    Schema.sObjectType sObjType = globalDescription.get(objectname);
+ 
+    //take care of the sequence of following 5 statements
+
+    sObjectToBind = sObjType.newSObject();
+    Schema.DescribeSObjectResult r1 = sObjType.getDescribe();
+  
+    List<User> lstUser = [ SELECT Id FROM User WHERE Username = 'rajesh060708@gmail.com' ];
+if( sObjectToBind != null && lstUser != null && !lstUser.isEmpty() )
+  sObjectToBind.put('OwnerId', lstUser[0].Id);
+
+       Map<String , Schema.SObjectField> mapFieldList = r1.fields.getMap();
+    Integer i = 0;
+    for(Schema.SObjectField field : mapFieldList.values())
+    {
+   
+        Schema.DescribeFieldResult fieldResult = field.getDescribe();
+        if(fieldResult.isAccessible() && fieldResult.isUpdateable())
+        {
+            listObjectFields.add(fieldResult.getName());
+        }
+    }      
+}
+
+}
+help me.........” 
