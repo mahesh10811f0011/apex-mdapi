@@ -1,92 +1,98 @@
 page:
 ----------
-<apex:repeat value="{!listObjectFields}" var="fieldAPIName">
-             <apex:selectCheckboxes value="{!checkboxSelections}" layout="PageDirection">
-    <apex:selectOptions value="{!MyCheckboxes}"/>
-</apex:selectCheckboxes>
-               <apex:inputField value="{!sObjectToBind[fieldAPIName]}"/>
-           </apex:repeat>
+   <apex:pageBlockSection title="Fields" columns="2">
+    <apex:repeat value="{!listObjectFieldInfoList}" var="fieldInfo">
+        <apex:pageBlockSectionItem rendered="{!fieldInfo.IsMultiSelectPickList==true}">
+            <apex:outputLabel value="{!fieldInfo.label}"/>
+            <apex:selectCheckboxes value="{!fieldInfo.checkboxSelections}" layout="PageDirection">
+                <apex:selectOptions value="{!fieldInfo.MyCheckboxes}"/>
+            </apex:selectCheckboxes>
+        </apex:pageBlockSectionItem>
+        <apex:inputField value="{!sObjectToBind[fieldInfo.fieldAPIName]}" rendered="{!fieldInfo.IsMultiSelectPickList==false}"/>
+    </apex:repeat>
+</apex:pageBlockSection>
 
 Controller:
 -------------
 public class DynaFieldSavePageCls {
-{get;set;}    //
-   
-    public sObject sObjectToBind {get;set;}
-    public List<String> listObjectFields {get;set;}
-     public  List<String> checkboxSelections 
-      public String strtemp;
 
-public String selcheckboxString;
+
+    
+    public List<FieldInfo> listObjectFieldInfoList {get;set;}
+
+   public String Render { get; set; }
   private Map<String, String> fieldValueLabels = new Map<String, String>();
- 
+     public  List<String> checkboxSelections {get;set;}
+      
+    public sObject sObjectToBind {get;set;}
+
    private Map<String, Map<String,String>> fieldpicklists = new Map<String, Map<String,String>>();
   public List<SelectOption> options{get;set;}
      public list<selectOption> getMyCheckboxes(){
 
-      string objectname ='rajesh__MForm__c';
+      string objectname ='rajesh__MForm__c'; 
 
-list<SelectOption> options = new list<SelectOption>();
-
-    Schema.sObjectType objType = sObjectToBind.getSObjectType();
-   
-      Schema.DescribeSObjectResult objDescribe = objType.getDescribe(); 
-      
-    map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap();
-   
+ list<SelectOption> options = new list<SelectOption>();
  
+ 
+
+    Schema.sObjectType objType = sObjectToBind.getSObjectType(); 
+    
+
+
+    Schema.DescribeSObjectResult objDescribe = objType.getDescribe();  
+    
+     
+
+    map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap(); 
+    
+    
     for(Schema.SObjectField field : fieldMap.values())
     {
 
       Schema.DescribeFieldResult fieldResult = field.getDescribe();
-     
-        if(fieldResult.getType() == Schema.DisplayType.MultiPickList) 
-        {
-       
-             Schema.Picklistentry[] values = fieldResult.getPickListValues();
-
-             Map<String, String> picklists = new Map<String, String>();
-
-             for(Schema.Picklistentry val: values)
-             { 
-             picklists.put(val.getLabel(), val.getValue());
-
-             fieldpicklists.put(fieldResult.getName(), picklists);
-              options.add(new SelectOption(val.getValue(), val.getLabel()));
-              }
       
-       }
-   
-}
-return options;
-
-}
-
-
+        if(fieldResult.getType() == Schema.DisplayType.MultiPickList) {
+        
+ Schema.Picklistentry[] values = fieldResult.getPickListValues();
  
+ Map<String, String> picklists = new Map<String, String>();
+
+ for(Schema.Picklistentry val: values){
+ 
+
+  options.add(new SelectOption(val.getValue(),val.getLabel()));
   
-  public void doSave()
+  
+ }
+  
+    
+}
+ return options;
+
+}
+
+
+ public void doSave()
 {
 if( sObjectToBind != null )
-  insert sObjectToBind;
+  upsert sObjectToBind;
 }
 
-
-       
    public DynaFieldSavePageCls()
 {
 
-     string objectname ='rajesh__MForm__c';
+      string objectname ='rajesh__MForm__c'; 
 
     listObjectFields =  new List<String>();
+    
+    listObjectFieldInfoList=new List<FieldInfo>();
     Map<String , Schema.SObjectType> globalDescription = Schema.getGlobalDescribe();
     Schema.sObjectType sObjType = globalDescription.get(objectname);
- 
-    //take care of the sequence of following 5 statements
-
+  
     sObjectToBind = sObjType.newSObject();
     Schema.DescribeSObjectResult r1 = sObjType.getDescribe();
-  
+   
     List<User> lstUser = [ SELECT Id FROM User WHERE Username = 'rajesh060708@gmail.com' ];
 if( sObjectToBind != null && lstUser != null && !lstUser.isEmpty() )
   sObjectToBind.put('OwnerId', lstUser[0].Id);
@@ -95,14 +101,33 @@ if( sObjectToBind != null && lstUser != null && !lstUser.isEmpty() )
     Integer i = 0;
     for(Schema.SObjectField field : mapFieldList.values())
     {
-   
+    
         Schema.DescribeFieldResult fieldResult = field.getDescribe();
         if(fieldResult.isAccessible() && fieldResult.isUpdateable())
         {
-            listObjectFields.add(fieldResult.getName());
+           
+           listObjectFieldInfoList.add(new FieldInfo(fieldResult.getName(),TRUE,fieldResult.getLabel()));
         }
-    }      
+    }       
 }
 
+public class FieldInfo
+{
+   public  String fieldAPIName {get;set;}
+  public  Boolean IsMultiSelectPickList {get;set;}
+  public String Label{get; set;}
+  
+  public boolean checkboxSelections{get; set;}
+  
+  public String MyCheckboxes{get ;set;}
+   
+   public FieldInfo(String fieldAPIName,Boolean IsMultiSelectPicklist,String Label)
+   {
+   this.fieldAPINAme=fieldAPIName;
+   this.IsMultiSelectPicklist=IsMultiSelectPicklist;
+   this.Label=Label;
+   }
 }
-help me.........” 
+
+
+}
