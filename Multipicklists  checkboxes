@@ -20,7 +20,7 @@ public class DynaFieldSavePageCls {
     
     public List<FieldInfo> listObjectFieldInfoList {get;set;}
 
-   public String Render { get; set; }
+
   private Map<String, String> fieldValueLabels = new Map<String, String>();
      public  List<String> checkboxSelections {get;set;}
       
